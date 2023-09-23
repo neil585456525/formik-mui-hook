@@ -1,0 +1,21 @@
+{
+  "name": "formik-mui-hook",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "repository": "https://github.com/neil585456525/formik-mui-hook.git",
+  "author": "neil585456525 <neil585456525@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "formik": "^2.4.5",
+    "lodash-es": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/lodash-es": "^4.17.9",
+    "rollup": "^3.29.0",
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.3",
+    "yup": "^1.2.0",
+    "@mui/material": "^5.14.10"
+  }
+}
