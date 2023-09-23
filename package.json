@@ -1,29 +1,33 @@
 {
   "name": "formik-mui-hook",
   "version": "0.1.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "type": "module",
   "repository": "https://github.com/neil585456525/formik-mui-hook.git",
   "author": "neil585456525 <neil585456525@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "test": "vitest"
+    "test": "vitest",
+    "build": "rollup --config"
   },
   "dependencies": {
     "formik": "^2.4.5",
     "lodash-es": "^4.17.21"
   },
   "devDependencies": {
-    "@types/lodash-es": "^4.17.9",
-    "rollup": "^3.29.0",
-    "typescript": "^5.2.2",
-    "vitest": "^0.34.3",
-    "yup": "^0.32.11",
+    "@mui/material": "^5.5.3",
+    "@rollup/plugin-node-resolve": "^15.2.1",
+    "@rollup/plugin-typescript": "^11.1.3",
     "@testing-library/react-hooks": "~8.0.1",
+    "@types/lodash-es": "^4.17.9",
     "@vitejs/plugin-react": "^4.0.4",
     "jsdom": "^19.0.0",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
-    "@mui/material": "^5.5.3"
+    "rollup": "^3.29.0",
+    "rollup-plugin-delete": "^2.0.0",
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.3",
+    "yup": "^0.32.11"
   }
 }
