@@ -1,5 +1,4 @@
 import { useFormik, FormikValues, FormikConfig } from "formik";
-import { FocusEvent, useEffect } from "react";
 import type {
   TextFieldProps,
   CheckboxProps,
@@ -22,71 +21,22 @@ class Wrapper<T> {
 
 type UseFormikFunction<T> = ReturnType<Wrapper<T>["wrapped"]>;
 
-interface FormikMuiHelperConfig {
-  /**
-   * @description if true, will validate the form on first render, show error text without user interaction.
-   * According to there might have some validation changing, but the data in db hasn't synced up.
-   * This is the better way than checking for each initialValues field, because the structure could be nested.
-   */
-  editMode?: boolean;
-  /**
-   * @description If set value, when it is false, will reset the form,
-   * then you can pass formik onRest config to do post handling
-   */
-  isFormExist?: boolean;
-}
-
 export const useFormikMui = <Values extends FormikValues = FormikValues>(
-  formikConfig: FormikConfig<Values>,
-  formikMuiHelperConfig?: FormikMuiHelperConfig
+  formikConfig: FormikConfig<Values>
 ) => {
   const formikInstance = useFormik(formikConfig);
-
-  const { editMode, isFormExist } = formikMuiHelperConfig || {};
-
-  useEffect(() => {
-    if (editMode) {
-      formikInstance.validateForm();
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isFormExist === undefined) return;
-    if (isFormExist === false) {
-      setTimeout(() => {
-        formikInstance.resetForm();
-      }, 500);
-    }
-  }, [isFormExist]);
-
-  const handleReset: typeof formikInstance.resetForm = (
-    nextState: Parameters<typeof formikInstance.resetForm>[0]
-  ) => {
-    formikInstance.resetForm(nextState);
-    if (editMode) {
-      formikInstance.validateForm();
-    }
-  };
 
   return {
     formik: {
       ...formikInstance,
-      handleReset,
     },
     validationSchema: formikConfig.validationSchema,
     formikMuiHelper: formikMuiHelper(
       formikInstance,
-      formikConfig.validationSchema,
-      formikMuiHelperConfig
+      formikConfig.validationSchema
     ),
   };
 };
-
-export type UseFormikResult<Values extends FormikValues = FormikValues> =
-  ReturnType<typeof useFormik<Values>>;
-
-export type UseFormikMuiResult<Values extends FormikValues = FormikValues> =
-  ReturnType<typeof useFormikMui<Values>>;
 
 export type FormikMuiHelper<TFormValue extends FormikValues = FormikValues> =
   ReturnType<typeof formikMuiHelper<TFormValue>>;
@@ -103,18 +53,14 @@ export const formikMuiHelper = <
   ValidationSchema extends ObjectSchema<any> = ObjectSchema<any>
 >(
   formikInstance: UseFormikFunction<FormValue>,
-  validationSchema?: ValidationSchema,
-  formikMuiHelperConfig?: FormikMuiHelperConfig
+  validationSchema?: ValidationSchema
 ) => {
   type ValueKey = keyof FormValue;
 
-  const { editMode } = formikMuiHelperConfig || {};
+  const _getTouchedAndError = (key: ValueKey) =>
+    get(formikInstance.touched, key) && get(formikInstance.errors, key);
 
-  const touchedAndError = (key: ValueKey) =>
-    !!(editMode || get(formikInstance.touched, key)) &&
-    get(formikInstance.errors, key);
-
-  const getIsRequired = (key: ValueKey) =>
+  const _getIsRequired = (key: ValueKey) =>
     //@ts-ignore
     validationSchema?.fields[key]?.exclusiveTests?.required || false;
 
@@ -125,14 +71,14 @@ export const formikMuiHelper = <
     const {
       isShowHelperText = true,
       onBeforeChange,
-      isRequired = getIsRequired(key),
+      isRequired = _getIsRequired(key),
     } = options || {};
 
     return {
-      error: !!touchedAndError(key),
+      error: !!_getTouchedAndError(key),
       required: isRequired,
       InputLabelProps: { required: isRequired },
-      ...(isShowHelperText && { helperText: touchedAndError(key) }),
+      ...(isShowHelperText && { helperText: _getTouchedAndError(key) }),
       ...formikInstance.getFieldProps(key as string),
       ...(onBeforeChange && {
         onChange: async (e) => {
@@ -150,14 +96,14 @@ export const formikMuiHelper = <
   const passToFastTextField = (
     key: ValueKey,
     defaultValue?: string,
-    isRequired = getIsRequired(key)
+    isRequired = _getIsRequired(key)
   ): TextFieldProps => {
     return {
       defaultValue,
-      error: !!touchedAndError(key),
+      error: !!_getTouchedAndError(key),
       required: isRequired,
-      helperText: touchedAndError(key),
-      onBlur: (event: FocusEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      helperText: _getTouchedAndError(key),
+      onBlur: (event: Parameters<TextFieldProps["onBlur"]>) =>
         formikInstance.setFieldValue(key as string, event.target.value),
     };
   };
@@ -200,7 +146,7 @@ export const formikMuiHelper = <
     passToCheckbox,
     passToRadioGroup,
     errorText: (key: ValueKey) =>
-      (editMode || formikInstance.touched[key]) && formikInstance.errors[key],
+      formikInstance.touched[key] && formikInstance.errors[key],
     formikInstance,
     isFormDirtyAndValid: formikInstance.dirty && formikInstance.isValid,
   };

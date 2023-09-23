@@ -4,6 +4,8 @@
         "module": "NodeNext",
         "moduleResolution": "NodeNext",
         "lib": [
+            "DOM",
+            "DOM.Iterable",
             "ESNext"
         ],
         "allowJs": false,
@@ -11,6 +13,7 @@
         "esModuleInterop": false,
         "allowSyntheticDefaultImports": true,
         "noEmit": true,
+        "jsx": "react-jsx",
         "allowImportingTsExtensions": true,
         "resolveJsonModule": true,
     },
