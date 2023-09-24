@@ -2,6 +2,8 @@
 
 Formik-MUI-Hook is a tiny, robust library designed to make it painless to work with Formik alongside MUI (Material-UI) components. By utilizing the hooks provided, developers can achieve better, simplified, and more readable forms with ease. This library aims to bridge the gap between Formik's powerful form handling capabilities and MUI's wide range of beautifully designed components.
 
+[useFormik Hook Documentation](https://formik.org/docs/api/useFormik)
+
 ## Setup
 
 Before using `formik-mui-hook`, ensure that you have its peer dependencies installed. You would need both `formik` and `@mui/material`. If not, you can install all required libraries with the following command:

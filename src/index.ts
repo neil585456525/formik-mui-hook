@@ -1,26 +1,15 @@
 import type { ReactNode } from "react";
-import { useFormik, FormikValues, FormikConfig } from "formik";
+import { useFormik, type FormikValues, type FormikConfig } from "formik";
 import type {
   TextFieldProps,
   CheckboxProps,
   RadioGroupProps,
+  SelectProps,
 } from "@mui/material";
 import type { ObjectSchema } from "yup";
+import { reach } from "yup";
 import { get } from "lodash-es";
-
-/**
- * ? Type work around
- * https://stackoverflow.com/questions/50321419/typescript-returntype-of-generic-function
- */
-class Wrapper<T> {
-  // wrapped has no explicit return type so we can infer it
-  wrapped(e: FormikConfig<T>) {
-    //@ts-ignore
-    return useFormik<T>(e);
-  }
-}
-
-type UseFormikFunction<T> = ReturnType<Wrapper<T>["wrapped"]>;
+import type { UseFormikFunction } from "./type.ts";
 
 export const useFormikMui = <Values extends FormikValues = FormikValues>(
   formikConfig: FormikConfig<Values>
@@ -45,8 +34,6 @@ export type FormikMuiHelper<TFormValue extends FormikValues = FormikValues> =
 interface PassToTextFieldOption {
   isShowHelperText?: boolean;
   onBeforeChange?: () => Promise<any> | any;
-  // override the required result from validation schema
-  isRequired?: boolean;
 }
 
 export const formikMuiHelper = <
@@ -62,27 +49,24 @@ export const formikMuiHelper = <
     get(formikInstance.touched, key) && get(formikInstance.errors, key);
 
   const _getIsRequired = (key: ValueKey) =>
+    //! `optional` is a internal property of yup, might be changed in the future
     //@ts-ignore
-    validationSchema?.fields[key]?.exclusiveTests?.required || false;
+    (!reach(validationSchema, key)?.describe()?.optional as boolean) || false;
 
   const passToTextField = (
     key: ValueKey,
     options?: PassToTextFieldOption
   ): TextFieldProps => {
-    const {
-      isShowHelperText = true,
-      onBeforeChange,
-      isRequired = _getIsRequired(key),
-    } = options || {};
+    const { isShowHelperText = true, onBeforeChange } = options || {};
 
     return {
-      error: !!_getTouchedAndError(key),
-      required: isRequired,
-      InputLabelProps: { required: isRequired },
-      ...(isShowHelperText && {
-        helperText: _getTouchedAndError(key) as ReactNode,
-      }),
       ...formikInstance.getFieldProps(key as string),
+      error: !!_getTouchedAndError(key),
+      required: _getIsRequired(key),
+      InputLabelProps: { required: _getIsRequired(key) },
+      helperText: isShowHelperText
+        ? (_getTouchedAndError(key) as ReactNode)
+        : undefined,
       ...(onBeforeChange && {
         onChange: async (e) => {
           await onBeforeChange?.();
@@ -92,10 +76,6 @@ export const formikMuiHelper = <
     };
   };
 
-  /**
-   * Will use input's self internal state to speed up the gigantic fields form.
-   * The state only update when input blur.
-   */
   const passToFastTextField = (
     key: ValueKey,
     defaultValue?: string,
@@ -108,6 +88,17 @@ export const formikMuiHelper = <
       helperText: _getTouchedAndError(key) as ReactNode,
       onBlur: (event: Parameters<TextFieldProps["onBlur"]>[0]) =>
         formikInstance.setFieldValue(key as string, event.target.value),
+    };
+  };
+
+  const passToSelect = (key: ValueKey): SelectProps => {
+    return {
+      ...formikInstance.getFieldProps(key as string),
+      error: !!_getTouchedAndError(key),
+      required: _getIsRequired(key),
+      onChange: (e) => {
+        formikInstance.setFieldValue(key as string, e.target.value);
+      },
     };
   };
 
@@ -145,8 +136,15 @@ export const formikMuiHelper = <
 
   return {
     passToTextField,
+    /**
+     * https://formik.org/docs/api/fastfield
+     * Will use input's self internal state to speed up the gigantic fields form.
+     * The state only update when input blur.
+     */
     passToFastTextField,
+    passToSelect,
     passToCheckbox,
+    passToSwitch: passToCheckbox,
     passToRadioGroup,
     errorText: (key: ValueKey) =>
       formikInstance.touched[key] && formikInstance.errors[key],
