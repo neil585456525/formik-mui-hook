@@ -38,18 +38,16 @@ import {
 } from "@mui/material";
 import * as yup from "yup";
 
-const validationSchema = yup.object().shape({
-  confirmText: yup.string().required("Confirmation Text is required"),
-  checkedGroups: yup.array().required("You must select at least one group"),
-});
-
 const MyForm = () => {
   const { formik, formikMuiHelper } = useFormikMui({
     initialValues: {
       confirmText: "",
       checkedGroups: [],
     },
-    validationSchema,
+    validationSchema: yup.object().shape({
+      confirmText: yup.string().required("Confirmation Text is required"),
+      checkedGroups: yup.array().required("You must select at least one group"),
+    }),
     onSubmit: (values) => {
       console.log(values);
     },
@@ -75,8 +73,6 @@ const MyForm = () => {
       </List>
 
       <TextField
-        inputProps={{ "data-test": "confirmTextInput" }}
-        required
         sx={{ width: "100%" }}
         {...formikMuiHelper.passToTextField("confirmText")}
         placeholder="Confirmation Text"
