@@ -3,3 +3,4 @@
 rollup.config.mjs
 *.log
 tsconfig*
+stats.html
