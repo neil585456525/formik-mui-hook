@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useFormik, FormikValues, FormikConfig } from "formik";
 import type {
   TextFieldProps,
@@ -78,7 +79,9 @@ export const formikMuiHelper = <
       error: !!_getTouchedAndError(key),
       required: isRequired,
       InputLabelProps: { required: isRequired },
-      ...(isShowHelperText && { helperText: _getTouchedAndError(key) }),
+      ...(isShowHelperText && {
+        helperText: _getTouchedAndError(key) as ReactNode,
+      }),
       ...formikInstance.getFieldProps(key as string),
       ...(onBeforeChange && {
         onChange: async (e) => {
@@ -102,8 +105,8 @@ export const formikMuiHelper = <
       defaultValue,
       error: !!_getTouchedAndError(key),
       required: isRequired,
-      helperText: _getTouchedAndError(key),
-      onBlur: (event: Parameters<TextFieldProps["onBlur"]>) =>
+      helperText: _getTouchedAndError(key) as ReactNode,
+      onBlur: (event: Parameters<TextFieldProps["onBlur"]>[0]) =>
         formikInstance.setFieldValue(key as string, event.target.value),
     };
   };
