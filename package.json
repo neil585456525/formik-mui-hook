@@ -1,11 +1,18 @@
 {
   "name": "formik-mui-hook",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "main": "dist/index.js",
   "type": "module",
   "repository": "https://github.com/neil585456525/formik-mui-hook.git",
   "author": "neil585456525 <neil585456525@gmail.com>",
   "license": "MIT",
+  "keywords": [
+    "formik",
+    "react",
+    "mui",
+    "material-ui",
+    "hook"
+  ],
   "scripts": {
     "test": "vitest",
     "build": "rollup --config"
